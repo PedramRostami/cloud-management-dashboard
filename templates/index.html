@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename= 'stylesheets/bootstrap.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename= 'stylesheets/bootstrap-grid.min.css') }}"  />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename= 'stylesheets/bootstrap-reboot.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename= 'stylesheets/styles.css') }}" />
+    <script type="text/javascript" src="{{ url_for('static', filename= 'scripts/script.js') }}"></script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">Cloud Computing Dashboard</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Developed by Pedram Rostami and Parham Rahimi</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    {% for i in range(vms|length) %}
+
+        <div class="container-sm shadow-sm p-3 mb-5 bg-white rounded app-container">
+
+            <div class="row">
+            <div class="col" style="display: flex; align-items: center" >
+                <h5 id="{{ ['name-', i|string]|join }}" style="margin-bottom: 0; color: #2f4f4f; text-align: center; vertical-align: middle; width: 100%">{{ vms[i]['name'] }}</h5>
+            </div>
+
+            <div class="col" style="display: flex; align-items: center">
+                {% if vms[i]['status'] == 'on' %}
+                    <h5 id="{{ ['status-', i|string]|join }}" style="margin-bottom: 0; color: green; font-weight: bold; vertical-align: middle; width: 100%">online</h5>
+                {% else %}
+                    <h5 id="{{ ['status-', i|string]|join }}" style="margin-bottom: 0; color: orange; font-style: italic; vertical-align: middle; width: 100%">offline</h5>
+                {% endif %}
+            </div>
+
+            <div class="col-5">
+                {% if vms[i]['status'] == 'on' %}
+                    <button id="{{ ['start-', i|string]|join }}" type="button" class="btn btn-success" onclick="start('{{ i|safe }}')" disabled>Start</button>
+                {% else %}
+                    <button id="{{ ['start-', i|string]|join }}" type="button" class="btn btn-success" onclick="start('{{ i|safe }}')">Start</button>
+                {% endif %}
+                {% if vms[i]['status'] == 'on' %}
+                    <button id="{{ ['shutdown-', i|string]|join }}" type="button" class="btn btn-warning" onclick="shutdown('{{ i|safe }}')">Shutdown</button>
+                {% else %}
+                    <button id="{{ ['shutdown-', i|string]|join }}" type="button" class="btn btn-warning" onclick="shutdown('{{ i|safe }}')" disabled>Shutdown</button>
+                {% endif %}
+                {% if vms[i]['status'] == 'on' %}
+                    <button id="{{ ['clone-', i|string]|join }}" type="button" class="btn btn-primary" onclick="clone_temp('{{ i|safe }}', '{{ (vms|length)|safe }}')" disabled>Clone</button>
+                {% else %}
+                    <button id="{{ ['clone-', i|string]|join }}" type="button" class="btn btn-primary" onclick="clone_temp('{{ i|safe }}', '{{ (vms|length)|safe }}')">Clone</button>
+                {% endif %}
+                {% if vms[i]['status'] == 'on' %}
+                    <button id="{{ ['remove-', i|string]|join }}" type="button" class="btn btn-danger" onclick="delete_temp('{{ i|safe }}')" disabled>Remove</button>
+                {% else %}
+                    <button id="{{ ['remove-', i|string]|join }}" type="button" class="btn btn-danger" onclick="delete_temp('{{ i|safe }}')">Remove</button>
+                {% endif %}
+
+            </div>
+
+            <div class="col">
+                <svg id="{{ ['refresh-', i|string]|join }}" width="32px" height="32px" viewBox="0 0 16 16" class="bi bi-arrow-repeat" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="float: right; cursor: pointer" onclick="refresh('{{ i|safe }}')">
+                    <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                    <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+                </svg>
+            </div>
+        </div>
+
+            <hr/>
+
+            <div class="row">
+            <div class="col">
+                <label>Name</label>
+                {% if vms[i]['status'] == 'on' %}
+                    <input id="{{ ['modified-name-', i|string]|join }}" type="text" class="form-control" value="{{ vms[i]['name'] }}" maxlength="16" disabled>
+                {% else %}
+                    <input id="{{ ['modified-name-', i|string]|join }}" type="text" class="form-control" value="{{ vms[i]['name'] }}" maxlength="16">
+                {% endif %}
+
+                <small id="{{ ['modified-name-error-', i|string]|join }}" class="form-text" style="color: red; font-style: italic; font-weight: bold; display: none">error</small>
+                <input id="{{ ['port-', i|string]|join }}" type="hidden" value={{ vms[i]['port'] }} />
+            </div>
+            <div class="col">
+                <label>Ram (MB)</label>
+                {% if vms[i]['status'] == 'on' %}
+                    <input id="{{ ['memory-', i|string]|join }}" type="text" class="form-control" value="{{ vms[i]['memory'] }}" maxlength="4" disabled>
+                {% else %}
+                    <input id="{{ ['memory-', i|string]|join }}" type="text" class="form-control" value="{{ vms[i]['memory'] }}" maxlength="4">
+                {% endif %}
+
+                <small id="{{ ['memory-error-', i|string]|join }}" class="form-text" style="color: red; font-style: italic; font-weight: bold; display: none">error</small>
+            </div>
+            <div class="col">
+                <label>Number of CPUs</label>
+                {% if vms[i]['status'] == 'on' %}
+                    <input id="{{ ['cpus-', i|string]|join }}" type="text" class="form-control" value="{{ vms[i]['cpus'] }}" maxlength="1" disabled>
+                {% else %}
+                    <input id="{{ ['cpus-', i|string]|join }}" type="text" class="form-control" value="{{ vms[i]['cpus'] }}" maxlength="1">
+                {% endif %}
+                <small id="{{ ['cpus-error-', i|string]|join }}" class="form-text" style="color: red; font-style: italic; font-weight: bold; display: none">error</small>
+            </div>
+            <div class="col" style="display: flex">
+                {% if vms[i]['status'] == 'on' %}
+                    <button id="{{ ['modify-', i|string]|join }}" type="button" class="btn btn-primary" style="align-self: flex-end; display: inline-block" onclick="modify('{{ i }}', '{{ vms|length }}')" disabled>Modify</button>
+                {% else %}
+                    <button id="{{ ['modify-', i|string]|join }}" type="button" class="btn btn-primary" style="align-self: flex-end; display: inline-block" onclick="modify('{{ i }}', '{{ vms|length }}')">Modify</button>
+                {% endif %}
+
+            </div>
+        </div>
+
+            <hr/>
+
+            <div class="row">
+                    <div class="col-9">
+                        <label>Command</label>
+                        {% if vms[i]['status'] == 'on' and vms[i]['port'] != 'None' %}
+                            <input id="{{ ['command-', i|string]|join }}" type="text" class="form-control">
+                        {% else %}
+                            <input id="{{ ['command-', i|string]|join }}" type="text" class="form-control" disabled>
+                        {% endif %}
+                    </div>
+                    <div class="col" style="display: flex">
+                        {% if vms[i]['status'] == 'on' and vms[i]['port'] != 'None' %}
+                            <button id="{{ ['run-', i|string]|join }}" type="button" class="btn btn-primary" style="align-self: flex-end; display: inline-block" onclick="run_temp('{{ i|safe }}')">Run</button>
+                        {% else %}
+                            <button id="{{ ['run-', i|string]|join }}" type="button" class="btn btn-primary" style="align-self: flex-end; display: inline-block" disabled onclick="run_temp('{{ i|safe }}')">Run</button>
+                        {% endif %}
+
+                    </div>
+            </div>
+
+            <div class="row" style="margin-top: 1em">
+            <div class="col">
+                <div class="form-group purple-border">
+                    <label for="exampleFormControlTextarea4">Result</label>
+                    <textarea id="{{ ['command-result-', i|string]|join }}" class="form-control" id="exampleFormControlTextarea4" rows="3" disabled></textarea>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+    {% endfor %}
+
+    <div class="modal fade" id="inform-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Inform</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('inform-modal')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <p id="inform-text">OK</p>
+            </div>
+              <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="closeModal('inform-modal')">OK</button>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('delete-modal')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove the following virtual machine?</p>
+                <p id="deleted-vm-name">deleted vm name</p>
+                <input type="hidden" id="deleted-vm-index"/>
+            </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-light" onclick="closeModal('delete-modal')">Cancel</button>
+                  <button type="button" class="btn btn-danger" onclick="delete_vm()">Remove</button>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="clone-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Clone</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('clone-modal')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <label>Clone from</label>
+                        <input id="src-clone-vm" type="text" class="form-control" value="cloning vm" maxlength="16" disabled>
+                    </div>
+                    <div class="col">
+                        <label>to</label>
+                        <input id="dest-clone-vm" type="text" class="form-control" value="cloning vm" maxlength="16">
+                        <small id="dest-clone-vm-error" class="form-text" style="color: red; font-style: italic; font-weight: bold; display: none">error</small>
+                    </div>
+                    <input type="hidden" id="clone-vm-index"/>
+                    <input type="hidden" id="clone-vm-index-count"/>
+                </div>
+
+                <input type="hidden" id="deleted-vm-index"/>
+            </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-light" onclick="closeModal('clone-modal')">Cancel</button>
+                  <button id="clone-btn" type="button" class="btn btn-primary" onclick="clone_vm()">Clone</button>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="run-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Run</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('run-modal')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <label>Username</label>
+                        <input id="vm-user" type="text" class="form-control" value="" placeholder="username" maxlength="16">
+                    </div>
+                    <div class="col">
+                        <label>Password</label>
+                        <input id="vm-password" type="password" class="form-control" value="" maxlength="16" placeholder="password">
+                    </div>
+                    <input type="hidden" id="run-vm-index"/>
+                </div>
+
+                <input type="hidden" id="deleted-vm-index"/>
+            </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-light" onclick="closeModal('run-modal')">Cancel</button>
+                  <button id="clone-btn" type="button" class="btn btn-primary" onclick="run_command()">Run</button>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop fade show" id="backdrop" style="display: none;"></div>
+
+    <div id="spinner" class="spinner-border text-primary" role="status" style="z-index: 1031; display: none; position: fixed; top: 50%; right: 50%">
+        <span class="sr-only">Loading...</span>
+    </div>
+</body>
+</html>
+
+
